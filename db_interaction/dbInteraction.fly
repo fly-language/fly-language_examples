@@ -3,11 +3,11 @@ var local = [type="smp",nthread=2]
 var cloud = [type="azure", clientID="", tenantID="", secret_key="", subscriptionID="", region="West Europe", language="python", threads=2, seconds=300]
 //var cloud = [type="aws", user="default", access_id_key = "", secret_access_key="", region="eu-west-2", language="python", thread=2, memory=256, time_=300]
 
-var dbConnLocal = [type="sql", dbName="dbfly", user="root", password="giuseppe"] on local
+var dbConnLocal = [type="sql", dbName="dbfly", user="root", password=""] on local
 
 var tableImport = [type="dataframe", table_name="temperaturacomune", source=dbConnLocal]
 	
-var fileCSV = [type="file", path="/home/giuseppe/PhD/FlyLanguage/TestFileFly/temperaturacomune.csv", ext="csv"]
+var fileCSV = [type="file", path="temperaturacomune.csv", ext="csv"]
 
 tableImport.export(fileCSV)
 
@@ -29,7 +29,7 @@ var columns = queryStmtCol.execute()
 
 func insertavg (columns){
 
-	var dbConnCloud = [type="sql", resourceGroup='isislab', instance='fly', dbName="companyFunding", user="", password=""] on cloud
+	var dbConnCloud = [type="sql", resourceGroup="", instance="", dbName="companyFunding", user="", password=""] on cloud
 	//var dbConnCloud = [type="sql", instance="database-1", dbName="companyFunding", user="root", password=""] on cloud
 	
 	for x in columns{
@@ -48,8 +48,8 @@ func insertavg (columns){
 }
 
 func checkIns (){  
-	var dbConnCloud = [type="sql", resourceGroup='isislab', instance='fly', dbName="companyFunding", user="", password=""] on cloud
-	//var dbConnCloud = [type="sql", instance="database-1", dbName="companyFunding", user="root", password=""] on cloud
+	var dbConnCloud = [type="sql", resourceGroup="", instance="", dbName="companyFunding", user="", password=""] on cloud
+	//var dbConnCloud = [type="sql", instance="", dbName="companyFunding", user="root", password=""] on cloud
 	var newTable = [type="dataframe", table_name="temperaturaprovincia", source=dbConnCloud]
 	
 	println newTable
