@@ -1,0 +1,500 @@
+var local = [type="smp", nthread=4]
+var cloud = [type="aws", user="default", access_id_key = "AKIA4TCJWOWLSC4ZTU76", secret_access_key="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", region="eu-west-2", language="nodejs12.x", thread=4, memory=256, time_=300] 
+var ch = [type="channel"] on cloud
+
+const nthread = 4
+const individualLength = 10 
+const dimension = 50
+const tournamentSize = 10
+const resultSize = 10
+
+const currentIndividual = 0 //Valori utilizzati dalla funzione di fitness per la corretta esecuzione delle fly functions
+const currentFitness = 0
+
+const parent1 = 0 //Indici dei genitori selezionati dalla popolazione per il crossover
+const parent2 = 0 
+
+const child1 = Integer[individualLength] //Risultati del crossover
+const child2 = Integer[individualLength]
+
+const toMutate = Integer[individualLength]
+const toEvaluate = Integer[individualLength]
+
+const indPos = 0
+const population= Integer[dimension][individualLength]
+const populationFitness= Integer[dimension]
+const champions = Integer[resultSize]
+const fitnessCount = 0
+const g = 0
+const solutionFound = 0
+
+
+//---Inizializzazione della popolazione come stringa binaria---
+func initPopulation(){
+	var newPop = Integer[dimension][individualLength]
+	population= newPop
+	var rand = [type="random"]
+	
+	for i in [0:dimension]{
+		for j in [0:individualLength]{
+			var value = 0
+			value = rand.nextInt(2)
+			
+			if(value < 0){
+				value = value * -1
+			}
+			
+			population[i][j]= value
+		}
+	}
+}
+
+func fitness(populationMatrix){
+	native<<<
+	var x = JSON.stringify(populationMatrix);
+	console.log("Tipo rows: " + typeof x + "\n Dati: " + x)
+
+	var indexPar = x.indexOf("{", 20)
+	var indexInf = x.indexOf("values", 20) - 2
+    var startIndex = indexInf + 11
+	var info = x.substring(1, indexInf) + "}"
+	console.log("Info String: " + info)
+	var JsonInfo = JSON.parse(info)
+    
+    var rows = JsonInfo.rows;
+	var cols = JsonInfo.cols;
+	var start = JsonInfo.submatrixIndex;
+    
+    var valuesNum = rows * cols
+	var sepVal = 2
+	var endIndex = startIndex - 2
+	var valIndex = endIndex - 1
+	var individual = ""
+	var fitnessValue = 0
+    var resultJSON = "[" + start + ", " + rows + ", "
+    
+    for(var i = 0; i < rows; i++){
+		for(var j = 0; j < cols; j++){
+        	startIndex = endIndex + sepVal
+        	endIndex = x.indexOf("}", startIndex)
+        	valIndex = endIndex - 1
+            var temp = x.substring(startIndex, endIndex) + "}"
+            var tempJson = JSON.parse(temp)
+    		individual += tempJson.value
+        	fitnessValue += parseInt(tempJson.value)
+    	}
+   		resultJSON += fitnessValue + ""
+    
+    	if(i >= 0 && i < rows - 1){
+    		resultJSON += ", "
+    	}
+    
+    	fitnessValue = 0
+    	individual = ""
+    
+	}
+	resultJSON += "]";
+	console.log("Result: " + resultJSON)
+		__data = await __sqs.getQueueUrl({ QueueName: "ch-'${id}'"}).promise();
+		
+		__params = {
+			MessageBody : JSON.stringify(resultJSON),
+			QueueUrl : __data.QueueUrl
+		};
+		
+		__data = await __sqs.sendMessage(__params).promise();
+		__data = await __sqs.getQueueUrl({ QueueName: "termination-'${function}'-'${id}'"}).promise();
+	>>>
+}
+
+func tournamentSelection(){
+	var selectedIndividual = -1
+	var rand = [type="random"]
+	
+	var tournament = Integer[tournamentSize]
+	
+	for j in [0:tournamentSize]{
+		var element = 0
+		element = rand.nextInt(dimension)
+		
+		if(element < 0){
+			element = element * -1
+		}
+		
+		tournament[j] = element
+		
+		for i in [0:tournamentSize]{
+			if(i != j){
+				if(tournament[i] == tournament[j]){
+					tournament[j] = -1	
+				}
+			}
+		}
+		
+		if(tournament[j] == -1){
+			j = j - 1
+		}
+	}
+	
+	var best = 0
+	best = tournament[0]
+	
+	for j in [1:tournamentSize]{
+		if(populationFitness[j] > populationFitness[best]){
+			best = tournament[j]
+		}
+	}
+	
+	selectedIndividual = best
+	return selectedIndividual
+}
+
+func onePointCrossover(){
+	var rand = [type="random"]
+	var crossoverPoint = 0
+	crossoverPoint = rand.nextInt(individualLength - 1)
+	
+	while(crossoverPoint == 0){
+		crossoverPoint = rand.nextInt(individualLength - 1)
+	}
+	
+	if(crossoverPoint < 0){
+		crossoverPoint = crossoverPoint * -1
+	}
+	
+	var p1 = Integer[individualLength]
+	var p2 = Integer[individualLength]
+	
+	for i in [0:individualLength]{
+		p1[i] = population[parent1][i]
+	}
+	
+	for i in [0:individualLength]{
+		p2[i] = population[parent2][i]
+	}
+	
+	var last2= Integer[individualLength - crossoverPoint]
+	var n = 0
+	for i in [crossoverPoint:individualLength]{ //Swap 1
+		last2[n] = p2[i]
+		n++
+		p2[i] = p1[i]
+	}
+	
+	var first1 = Integer[crossoverPoint]
+	n = 0
+	for i in [0:crossoverPoint]{ //Swap 2
+		first1[n] = p1[i]
+		n++
+		p1[i] = p2[i]
+	}
+	
+	n = 0
+	var m = 0
+	for i in [0:crossoverPoint]{
+		if(i < crossoverPoint){
+			p2[i] = first1[n]
+			n++
+		}
+		else{
+			p2[i] = last2[m]
+			m++
+		}
+	}
+	
+	for i in [0:individualLength]{
+		child1[i] = p1[i]
+		child2[i] = p2[i]
+	}
+}
+
+func gaussianMutation(){
+	var rand = [type="random"]
+	
+	for i in [0:individualLength]{
+		var mutationChance = 0
+		mutationChance = rand.nextInt(2)
+		
+		if(mutationChance < 0){
+			mutationChance = mutationChance * -1
+		}
+		
+		if(mutationChance > 0){
+			if(toMutate[i] == 1){
+				toMutate[i] = 0
+			}
+			else{
+				toMutate[i] = 1
+			}	
+		}
+	} 
+}
+
+func max(){
+	var max = -1
+	for i in [0:dimension]{
+		if(populationFitness[i] > max){
+			max = populationFitness[i]
+		}
+	}
+	return max
+}
+
+func maxIndex(){
+	var max = -1
+	var index = dimension - 1
+	
+	for i in [0:dimension]{
+		if(populationFitness[i] > max){
+			max = populationFitness[i]
+			index = i
+		}
+	}
+	return index
+}
+
+func minIndex(){
+	var min = 0
+	min = individualLength
+	var index = dimension - 1
+	
+	for i in [0:dimension]{
+		if(populationFitness[i] < min){
+			min = populationFitness[i]
+			index = i
+		}
+	}
+	return index
+}
+
+
+initPopulation()
+
+fly fitness in population by row on cloud
+
+var results = String[nthread]
+for i in[0:nthread]{
+	var e = ch? as String
+	e = e.replace('\\"', "")
+	e = e.replace('\\"', "")
+	
+	var stIndex = 0 
+	stIndex = e.indexOf(',')
+	
+	var matrixPortion = 0
+	matrixPortion = e.substring(1, stIndex) as Integer
+	
+	results[matrixPortion] = e
+}
+
+var lastStart = 0
+for i in[0:nthread]{
+	var e = results[i]
+	
+	var stIndex = 0 
+	stIndex = e.indexOf(',')
+	
+	var start = 0
+	start = e.substring(1, stIndex) as Integer
+	
+	var rowsIndex = 0
+	rowsIndex = e.indexOf(',', stIndex + 1)
+	
+	var rows = 0
+	rows = e.substring(stIndex + 2, rowsIndex) as Integer
+	
+	var startPoint = 0
+	startPoint = lastStart
+	lastStart += rows
+	
+	if(i == nthread){
+		startPoint = dimension - rows - 1
+	}
+	
+	var counter = 0
+				
+	var startVal = 0 
+	startVal = rowsIndex + 2
+	
+	var endVal = 0
+	endVal = e.indexOf(',', startVal)
+	
+	var value = 0
+	
+	while(endVal != -1) {
+		value = e.substring(startVal, endVal) as Integer
+		populationFitness[startPoint + counter] = value
+					
+		//System.out.println("ind: " + (start + counter) + ", fit: " + value); //debug
+					
+		counter++
+		startVal = endVal + 2
+		endVal = e.indexOf(',', startVal)
+	}
+	
+	endVal = e.indexOf(']', startVal)
+	value = e.substring(startVal, endVal) as Integer
+	populationFitness[startPoint + counter] = value
+}
+
+while(solutionFound == 0){
+	g++
+	
+	for i in[0:resultSize]{
+		var champion = 0
+		champion = tournamentSelection()
+		champions[i] = champion
+	}
+	
+	var resSize = 0
+	resSize = resultSize * (resultSize - 1)
+	
+	var newIndividuals = Integer[resSize][individualLength]
+	var newIndividualsFitness = Integer[resSize]
+	var newIndividualsIndex = 0
+	
+	var itSize = 0
+	itSize = resultSize - 1
+	
+	for i in[0:itSize]{
+		var initialIndex = 0
+		initialIndex = i + 1
+		
+		for k in [initialIndex:resultSize]{
+			parent1 = champions[i]
+			parent2 = champions[k]
+			
+			onePointCrossover()
+			
+			for j in [0:individualLength]{
+				toMutate[j] = child1[j]
+			}
+			
+			var rand = [type="random"]
+			var mutationProbability = 0 
+			mutationProbability = rand.nextInt(10)
+			if(mutationProbability < 0){
+				mutationProbability = mutationProbability * -1
+			}
+			if(mutationProbability > 7){
+				gaussianMutation()
+			}
+			
+			for j in [0:individualLength]{
+				newIndividuals[newIndividualsIndex][j] = toMutate[j]
+			}
+			
+			for j in [0:individualLength]{
+				toMutate[j] = child2[j]
+			}
+			
+			mutationProbability = rand.nextInt(10)
+			if(mutationProbability < 0){
+				mutationProbability = mutationProbability * -1
+			}
+			if(mutationProbability > 7){
+				gaussianMutation()
+			}
+			
+			for j in [0:individualLength]{
+				newIndividuals[newIndividualsIndex + 1][j] = toMutate[j]
+			}
+			
+			newIndividualsIndex += 2
+		}
+	}
+	
+	fly fitness in newIndividuals by row on cloud
+		//copia risultati in newIndividualsFitness
+		
+	for i in[0:nthread]{
+		var e = ch? as String
+		e = e.replace('\\"', "")
+		e = e.replace('\\"', "")
+	
+		var stIndex = 0 
+		stIndex = e.indexOf(',')
+	
+		var matrixPortion = 0
+		matrixPortion = e.substring(1, stIndex) as Integer
+	
+		results[matrixPortion] = e
+	}
+	
+	lastStart = 0
+	
+	for i in[0:nthread]{
+		var e = results[i]
+	
+		var stIndex = 0 
+		stIndex = e.indexOf(',')
+	
+		var start = 0
+		start = e.substring(1, stIndex) as Integer
+	
+		var rowsIndex = 0
+		rowsIndex = e.indexOf(',', stIndex + 1)
+	
+		var rows = 0
+		rows = e.substring(stIndex + 2, rowsIndex) as Integer
+	
+		var startPoint = 0
+		startPoint = lastStart
+		lastStart += rows
+	
+		if(i == nthread){
+			startPoint = resSize - rows - 1
+		}
+	
+		var counter = 0
+				
+		var startVal = 0 
+		startVal = rowsIndex + 2
+	
+		var endVal = 0
+		endVal = e.indexOf(',', startVal)
+	
+		var value = 0
+	
+		while(endVal != -1) {
+			value = e.substring(startVal, endVal) as Integer
+			newIndividualsFitness[startPoint + counter] = value
+					
+		//System.out.println("ind: " + (start + counter) + ", fit: " + value); //debug
+					
+			counter++
+			startVal = endVal + 2
+			endVal = e.indexOf(',', startVal)
+		}
+	
+	endVal = e.indexOf(']', startVal)
+	value = e.substring(startVal, endVal) as Integer
+	newIndividualsFitness[startPoint + counter] = value
+}
+	
+	for i in [0:resSize]{
+		var minn = 0
+		minn = minIndex()
+		if(populationFitness[minn] < newIndividualsFitness[i]){
+			for j in [0:individualLength]{
+				population[minn][j] = newIndividuals[i][j]
+			}
+			populationFitness[minn] = newIndividualsFitness[i]
+		}
+	}
+	
+	var maxx = 0
+	maxx = max()
+	if(maxx >= individualLength){
+		solutionFound = 1
+		indPos = maxIndex()
+	}
+}
+var toPrint = ""
+for i in [0:individualLength]{
+	toPrint += population[indPos][i]
+}
+
+println("---Generation " + g + "---")
+println("Optimal solution found at index " + indPos + " [" + toPrint + "]")
+
