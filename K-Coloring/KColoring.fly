@@ -1,5 +1,5 @@
 var local = [type="smp", nthread=1]
-var cloud = [type="aws", user="default", access_id_key = "AKIA4TCJWOWLSC4ZTU76", secret_access_key="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", region="eu-west-2", language="nodejs12.x", thread=4, memory=256, time_=300] 
+var cloud = [type="aws", user="default", access_id_key = "", secret_access_key="", region="eu-west-2", language="nodejs12.x", thread=4, memory=256, time_=300] 
 var ch = [type="channel"] on cloud
 
 const nthread = 4
