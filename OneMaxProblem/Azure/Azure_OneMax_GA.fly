@@ -1,6 +1,5 @@
 var local = [type="smp", nthread=4]
-var cloud = [type="azure", clientID="9164255f-8bd5-4ec4-9c0a-4779b6d7511a", tenantID="c30767db-3dda-4dd4-8a4d-097d22cb99d3", secret_key="ucZNrII~9he2je5E04~wXxR6o-e7vzVH4b", subscriptionID="0b25336b-8446-4a5d-ad85-a644163713c4", region="West Europe", language="nodejs12.x", threads=4, seconds=300]
-//var cloud = [type="aws", user="default", access_id_key = "AKIA4TCJWOWLSC4ZTU76", secret_access_key="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", region="eu-west-2", language="nodejs12.x", thread=4, memory=256, time_=300] 
+var cloud = [type="azure", clientID="", tenantID="", secret_key="", subscriptionID="", region="West Europe", language="nodejs12.x", threads=4, seconds=300]
 var ch = [type="channel"] on cloud
 
 const nthread = 4
