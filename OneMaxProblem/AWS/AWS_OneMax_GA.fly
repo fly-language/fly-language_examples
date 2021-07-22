@@ -20,7 +20,6 @@ const indPos = 0
 const population= Integer[dimension][individualLength]
 const populationFitness= Integer[dimension]
 const champions = Integer[resultSize]
-const fitnessCount = 0
 const g = 0
 const solutionFound = 0
 
