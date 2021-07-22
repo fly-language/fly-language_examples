@@ -8,9 +8,6 @@ const dimension = 50
 const tournamentSize = 5
 const resultSize = 10
 
-const currentIndividual = 0 //Valori utilizzati dalla funzione di fitness per la corretta esecuzione delle fly functions
-const currentFitness = 0
-
 const parent1 = 0 //Indici dei genitori selezionati dalla popolazione per il crossover
 const parent2 = 0 
 
@@ -18,13 +15,11 @@ const child1 = Integer[individualLength] //Risultati del crossover
 const child2 = Integer[individualLength]
 
 const toMutate = Integer[individualLength]
-const toEvaluate = Integer[individualLength]
 
 const indPos = 0
 const population= Integer[dimension][individualLength]
 const populationFitness= Integer[dimension]
 const champions = Integer[resultSize]
-const fitnessCount = 0
 const g = 0
 const solutionFound = 0
 
