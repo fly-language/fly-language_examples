@@ -1,8 +1,7 @@
-# One Max Problem Genetic Algorithm 
+# K-Coloring Problem Genetic Algorithm 
 
-### One Max Problem
-One Max Problem, also known as "the problem of the max binary vector generation", is a well-known problem in the branch of genetic algorithms.
-The purpose of this algorithm is to generate a vector with every element set to 1.
+### K-Coloring Problem
+//TODO
 
 ## Variables
 * __cloud__ is used to set the cloud environment.
@@ -39,7 +38,6 @@ The purpose of this algorithm is to generate a vector with every element set to 
 * __tournamentSelection__ create a tournament with randomly selected individuals. The winner has granted access to the crossover.
 * __onePointCrossover__ generate two new individuals combining the genes of __parent 1__ and __parent 2__.
 * __gaussianMutation__ randomly changes values in the gene pool of a new individual.
-* __min__ returns the minimum fitness value in the __population__.
 * __maxIndex__ returns the index of the individual with the maximum fitness value in the __population__.
 * __minIndex__ returns the index of the individual with the minimum fitness value in the __population__.
 
