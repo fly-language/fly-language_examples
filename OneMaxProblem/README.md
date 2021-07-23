@@ -43,3 +43,4 @@ In order to correctly run the genetic algorithm, there are some rules that must 
 * The values of the variable __nthread__ and its counterpart in the environment declaration (the __cloud__ variable) must be equal.
 * The value of __tournamentSize__ must be less than __dimension__'s one.
 * The value of __nThread__, __dimension__, __individualLength__, __tournamentSize__ and __resultSize__ must be greater than 0.
+* Each other variable must not be changed.
