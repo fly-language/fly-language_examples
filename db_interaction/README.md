@@ -1,88 +1,80 @@
-# FLY a Domain Specific Language for scientific computing on the Multi Cloud 
+# DB Interaction example
 
-FLY is a parallel work-flow scripting imperative language inspired by functional languages peculiarities.
-FLY uses two type of run-time environment: the local machine and/or cloud infrastructure. FLY perceives a cloud computing infrastructure as a parallel computing architecture on which it is possible to execute some parts of its execution flow in parallel.
+### Average temperature insertion
+The example aims to show how to interact with a database in Fly language. The operations will calculate the average temperature for each province.
 
-FLY main goals are:
-* ___expressiveness___, in deploying scientific large-scale computing work-flows;
-* ___programming usability___, writing .fly program should be straightforward for domain experts, while the interaction with the cloud environment should be completely transparent; the users do not need to know the cloud providers APIs;
-* ___scalability___ either on symmetric multiprocessing (SMP) architectures or cloud computing infrastructures supporting FaaS. 
+## How to run
+In order to correctly run the genetic algorithm, there are some rules that must be respectes:
+* The value of __nthread__ must be a number between 0 and the number of different provinces into the database.
+* There are multiple declaration of the __cloud__ environment, one for each supported Cloud Provider. Only one of them could not be commented.
 
-FLY is compiled in native code (Java code) and it is able to automatically exploits the computing resources available that better fit its computation requirements. The innovative aspect of FLY is constituted by the concept of ___FLY function___. A FLY function can be seen as an independent block of code, that can be executed concurrently.
+## CSV File
+The content of the CSV file is the following:
+| ID | Temperature | City | Province |
+|:---:|:---:|:---:|:---:|
+|1|11|Marcianise|Caserta|
+|2|14|Napoli|Napoli|
+|3|9|Fisciano|Salerno|
+|4|13|Capua|Caserta|
+|5|13|Afragola|Napoli|
+|6|11|Nocera|Salerno|
+|7|12|Aversa|Caserta|
+|8|12|Acerra|Napoli|
+|9|10|Salerno|Salerno|
+|10|14|Battipaglia|Salerno|
+|11|13.5|Eboli|Salerno|
+|12|12.6|Maddaloni|Caserta|
+|13|13.3|Mondragone|Caserta|
+|14|14|Torre del Greco|Napoli|
+|15|13.5|Casoria|Napoli|
 
-| Faas Cloud Computing Infrastructure | Supported          | Under development  | Future development |
-|:-------------------------------------:|:--------------------:|:--------------------:|:--------------------:|
-| Amazon AWS                          | :heavy_check_mark: |                    |                    |
-| Microsoft Azure                     | :heavy_check_mark: |                    |                    |
-| [LocalStack](https://localstack.cloud/)| :heavy_check_mark: |                 |                    |
-| Google Function                     |                    | :heavy_check_mark: |  |
-| IBM Bluemix/Apache OpenWhisk        |                    |                    | :heavy_check_mark: |
 
-Supported Languages:
+## Functions
 
-|Faas Cloud Computing Infrastructure |Python | Javascript|
-|:-------------------------------------:|:--------------------:|:--------------------:|
-| Amazon AWS                               | :heavy_check_mark: |:heavy_check_mark:   |
-| Microsoft Azure                          | :heavy_check_mark: |:heavy_check_mark:   |
-| [LocalStack](https://localstack.cloud/)  | :heavy_check_mark: |:heavy_check_mark:   |
+The program is composed by two functions:
 
-### Requirements
+* **[Insert average Function](#insert-average-function)**
+* **[Check insertion Function](#check-insertion-function)**
+  
+### Insert average Function 
 
-- Ubuntu or OSX OS
-- Java 8 (or greater)
-- Apache Maven 3 (or greater)
-- Amazon AWS CLI and SDK
-- Python 3
-- Node.js 8.10
+This function calculates the average temperature for each province, then insert the value into the database. If the query is correctly executed, every city of a determined province will have the same temperature of the others. Before executing this function, the program creates the DB from the CSV file and calculate the __columns__ variable, containing the list of all provinces in the database.
 
-## Fly project maven archetype
-
-Download the [fly-project-quickstart.zip](https://github.com/spagnuolocarmine/FLY-language/releases/download/Alpha-1.5/fly-project-quickstart.zip)
-
-Unpack the fly-project-quickstart.zip:
-```
-unzip fly-project-quickstart.zip
-```
-
-Go to the subfolder local-repo inside the fly-project-quickstart and install the azureclient dependency:
-```
-cd fly-project-quickstart/src/main/resources/archetype-resources/local-repo/
-
-mvn install:install-file -Dfile=./azureclient-0.0.1-SNAPSHOT.jar -DgroupId=isislab -DartifactId=azureclient -Dversion=0.0.1-SNAPSHOT -Dpackaging=jar
-```
-
-Go to to the top of folder fly-project-quickstart and install the maven archetype:
+The Fly code is the following:
 
 ```
-cd fly-project-quickstart/
-mvn install
-mvn archetype:crawl
+func insertavg (columns){
+
+	var dbConnCloud = [type="sql", resourceGroup="", instance="", dbName="companyFunding", user="", password=""] on cloud
+	//var dbConnCloud = [type="sql", instance="database-1", dbName="companyFunding", user="root", password=""] on cloud
+	
+	for x in columns{
+		var queryStrAvg = "SELECT AVG(temperatura) FROM temperaturacomune WHERE provincia = \\\"" + x[0] as String + "\\\""
+		
+		var queryStmtAvg = [type="query", query_type="value", connection=dbConnCloud, statement=queryStrAvg]
+	
+		var avg = queryStmtAvg.execute()
+
+		var queryStrIns = "INSERT INTO temperaturaprovincia (temperatura, provincia) VALUES ( \\\"" + avg + "\\\", \\\"" + x[0] as String + "\\\")"
+		
+		var queryStmtIns = [type="query", query_type="update", connection=dbConnCloud, statement=queryStrIns]
+	
+		queryStmtIns.execute()
+	}
+}
 ```
 
-## Standalone FLY compiler
+### Check insertion Function 
 
-Download the [fly_standalone.zip](https://github.com/spagnuolocarmine/FLY-language/releases/download/Alpha-1.5/fly_standalone.zip):  
+The check insertion function prints the database after the updates in order to check if the insertion has been correctly executed.
+The Fly code is the following:
 
-Unzip the :
+``` 
+func checkIns (){  
+	var dbConnCloud = [type="sql", resourceGroup="", instance="", dbName="companyFunding", user="", password=""] on cloud
+	//var dbConnCloud = [type="sql", instance="", dbName="companyFunding", user="root", password=""] on cloud
+	var newTable = [type="dataframe", table_name="temperaturaprovincia", source=dbConnCloud]
+	
+	println newTable
+}
 ```
-unzip fly_standalone.zip
-```
-Compile and run a .fly program :
-```
-cd <path-to-compiler> 
-
-./fly-cc <name-example>.fly
-```
-
-
-The Standalone compiler are tested on several platform:
-
-| Platform / Architecture     | x86 | x86_64 |
-|-----------------------------|-----|--------|
-| Windows (7, 8, 10, ...)     | x   | x      |
-| Ubuntu (18.04 or later)     | ✓   | ✓      |
-| OSX (10.12 Sierra or later) | ✓   | ✓      |
-
-## List of Publications:
-* *Towards a Domain-Specific Language for Scientific Computing on Multicloud Systems*, 1st International Workshop on Parallel Programming Models in High- Performance Cloud (ParaMo 2019).
-*  *FLY: A Domain-Specific Language for Scientific Computing on FaaS*, Lect. Notes Comput. Sci. (including Subser. Lect. Notes Artif. Intell. Lect. Notes Bioinformatics), 2020.
