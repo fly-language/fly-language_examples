@@ -26,7 +26,7 @@ var y = 0
 y = x    //Right. Fly generator will recognize y variable as Integer.
 ```
 
-2. If you have to use data structures in a function, prefer using ___const___ instead of passing parameters. This allows to avoid other type parsing errors. Here are some examples:
+2. If you have to use data structures in a function, prefer using ___const___ instead of passing parameters. This allows to avoid other type parsing errors. Here is an example:
 
 ```
 var x = [[0, 1, 2], [3, 4, 5]] //Matrix declaration
