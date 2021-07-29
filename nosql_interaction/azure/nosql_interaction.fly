@@ -6,7 +6,6 @@ var Azure = [type = "azure", client_id = "",
 	subscription_id = "", region = "West Europe", language = "python3.6",
 	nthread = 4, seconds = 300]
 
-// ================== TEST ALL OPERATION ================== //	
 func test() {
 	var nosql = [type = "nosql", client = "mongodb://127.0.0.1:27017", database = "mydb", collection = "weather"]
 	// var nosql = [type = "nosql", resource_group = "example-resource-group", instance = "example-instance", database = "mydb", collection = "weather"] on Azure
