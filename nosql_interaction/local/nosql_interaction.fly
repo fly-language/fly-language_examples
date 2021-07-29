@@ -1,0 +1,98 @@
+var local = [type = "smp", nthread = 4]
+
+// ================== TEST INSERT OPERATION ================== //	
+func insert() {
+	var nosql = [type = "nosql", client = "mongodb://127.0.0.1:27017", database = "mydb", collection = "weather"]
+	
+	var pathOfCSV = "/home/devci/Documenti/GitHub/nosql-fly-implementation/FLY-MongoDB/weatherHistory.csv"
+	var weatherCSV = [type = "file", path = pathOfCSV]
+	
+	var insertWeatherCSV = [type = "query", query_type = "insert", collection = nosql, 
+		statement = weatherCSV, from = "0", to = "150"]
+	
+	insertWeatherCSV.execute()
+	
+	var statementInsertStudent = "{\\\"name\\\": \\\"Antonio\\\", \\\"surname\\\": \\\"Cirillo\\\", \\\"age\\\": 21, \\\"address\\\": "
+		+ "{\\\"city\\\": \\\"Battipaglia\\\", \\\"zip\\\": 84091, \\\"street\\\": \\\"Via Domodossola\\\"}, \\\"tel\\\": [\\\"333-xxxxxx\\\"]}"
+	
+	var insertStudent = [type = "query", query_type = "insert", collection = nosql, statement = statementInsertStudent]
+	
+	insertStudent.execute()
+	
+	var statementInsertStudents = "[{\\\"name\\\": \\\"Giovanni\\\", \\\"surname\\\": \\\"Rapa\\\", \\\"age\\\": 22, \\\"address\\\": "
+		+ "{\\\"city\\\": \\\"Giffoni V.P.\\\", \\\"zip\\\": 84095, \\\"street\\\": \\\"Via Italia\\\"}, \\\"tel\\\": [\\\"333-xxxxxxx\\\", \\\"335-xxxxxxx\\\"]}, "
+		+ "{\\\"name\\\": \\\"Mario\\\", \\\"surname\\\": \\\"De Riggi\\\", \\\"age\\\": 25, \\\"address\\\": {\\\"city\\\": \\\"Montecorvino Pugliano\\\", \\\"zip\\\": 84092, "
+		+ "\\\"street\\\": \\\"Via Roma\\\"}, \\\"tel\\\": [\\\"331-xxxxxxx\\\"]} ]"
+	
+	var insertStudents = [type = "query", query_type = "insert", collection = nosql, statement = statementInsertStudents]
+	
+	insertStudents.execute()
+}
+
+// ================== TEST SELECT OPERATION ================== //
+func select() {
+	var nosql = [type = "nosql", client = "mongodb://127.0.0.1:27017", database = "mydb", collection = "weather", file = "log4j.properties"]
+	
+	var query = [type = "query", query_type = "select", collection = nosql, statement = '{ }']
+		
+	var result = query.execute()
+	
+	for table in result {
+		println "\\n" + table
+
+	}
+
+}
+
+fly insert in [0:1] on local thenall select
+
+// ================== TEST UPDATE OPERATION ================== //
+func update() {
+	var nosql = [type = "nosql", client = "mongodb://127.0.0.1:27017", database = "mydb", collection = "weather"]
+	
+	var filterUpdate = "{\\\"address.city\\\": \\\"Battipaglia\\\"}"
+
+	var statementUpdate = "{ \\\"$set\\\": {\\\"address.city\\\": \\\"Montecorvino Pugliano\\\", \\\"address.zip\\\": 84092} }"
+	
+	var update = [type = "query", query_type = "update", collection = nosql, filter = filterUpdate, statement = statementUpdate]
+	
+	update.execute()
+	
+	println "\\n Update operation completed."
+}
+
+fly update in [0:1] on local thenall select
+
+// ================== TEST REPLACE OPERATION ================== //
+func replace() {
+	var nosql = [type = "nosql", client = "mongodb://127.0.0.1:27017", database = "mydb", collection = "weather"]
+	
+	var filterReplace = "{\\\"name\\\": \\\"Giovanni\\\"}"
+	
+	var statementReplace = "{\\\"name\\\": \\\"Carmine\\\", \\\"surname\\\": \\\"Amendola\\\", \\\"age\\\": 28, \\\"address\\\": {\\\"city\\\": \\\"Montecorvino Pugliano\\\", "
+		+ "\\\"zip\\\": 84092, \\\"street\\\": \\\"Via Giovanni\\\"}, \\\"tel\\\": [\\\"392-xxxxxxx\\\", \\\"321-xxxxxxx\\\"]}"
+	
+	var replace = [type = "query", query_type = "replace", collection = nosql, filter = filterReplace, statement = statementReplace]
+		
+	replace.execute()
+	
+	println "\\n Replace operation completed."
+}
+
+fly replace in [0:1] on local thenall select
+
+// ================== TEST DELETE OPERATION ================== //
+func drop() {	
+	var nosql = [type = "nosql", client = "mongodb://127.0.0.1:27017", database = "mydb", collection = "weather"]
+
+	var query = [type = "query", query_type = "delete", collection = nosql, statement = "{ }"]
+	
+	var result = query.execute()
+	
+	if(result > 0) {
+		println "\\nCollection dropped!"
+		println result + " elements was removed."		
+	}
+}
+
+fly drop in [0:1] on local
