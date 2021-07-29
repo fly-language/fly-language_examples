@@ -4,7 +4,7 @@
 The example aims to show how to interact with a database in Fly language. The operations will calculate the average temperature for each province.
 
 ## How to run
-In order to correctly run the genetic algorithm, there are some rules that must be respectes:
+In order to correctly run the algorithm, there are some rules that must be respectes:
 * The value of __nthread__ must be a number between 0 and the number of different provinces into the database.
 * There are multiple declaration of the __cloud__ environment, one for each supported Cloud Provider. Only one of them could not be commented.
 
