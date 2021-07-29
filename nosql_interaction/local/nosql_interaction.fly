@@ -1,6 +1,5 @@
 var local = [type = "smp", nthread = 4]
 
-// ================== TEST INSERT OPERATION ================== //	
 func insert() {
 	var nosql = [type = "nosql", client = "mongodb://127.0.0.1:27017", database = "mydb", collection = "weather"]
 	
@@ -29,7 +28,6 @@ func insert() {
 	insertStudents.execute()
 }
 
-// ================== TEST SELECT OPERATION ================== //
 func select() {
 	var nosql = [type = "nosql", client = "mongodb://127.0.0.1:27017", database = "mydb", collection = "weather", file = "log4j.properties"]
 	
@@ -46,7 +44,6 @@ func select() {
 
 fly insert in [0:1] on local thenall select
 
-// ================== TEST UPDATE OPERATION ================== //
 func update() {
 	var nosql = [type = "nosql", client = "mongodb://127.0.0.1:27017", database = "mydb", collection = "weather"]
 	
@@ -63,7 +60,6 @@ func update() {
 
 fly update in [0:1] on local thenall select
 
-// ================== TEST REPLACE OPERATION ================== //
 func replace() {
 	var nosql = [type = "nosql", client = "mongodb://127.0.0.1:27017", database = "mydb", collection = "weather"]
 	
@@ -81,7 +77,6 @@ func replace() {
 
 fly replace in [0:1] on local thenall select
 
-// ================== TEST DELETE OPERATION ================== //
 func drop() {	
 	var nosql = [type = "nosql", client = "mongodb://127.0.0.1:27017", database = "mydb", collection = "weather"]
 
