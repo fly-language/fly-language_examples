@@ -107,7 +107,7 @@ for(var __i = 0; __i < __populationMatrix_rows; __i++){
 		
 	__data = await __sqs.sendMessage(__params).promise();
 	__data = await __sqs.getQueueUrl({ QueueName: "termination-'${function}'-'${id}'"}).promise();
-	>>>
+>>>
 ```
 This funcition is made to evaluate a portion of individuals in a serverless environment. For this reason, results are formatted in a Json string, containing also the number of evaluated individuals and the __submatrixIndex__ number. Results are sent to the client over a channel, ordered by __submatrixIndex__ number and assigned to each evaluated individual.
 
