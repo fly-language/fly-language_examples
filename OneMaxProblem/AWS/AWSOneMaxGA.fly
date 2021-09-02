@@ -46,23 +46,7 @@ func initPopulation(){
 func fitness(populationMatrix){
 native<<<
 	console.log(event.data[0])
-	__populationMatrix_matrix = event.data[0]
-	__populationMatrix_rows = event.data[0].rows
-	__populationMatrix_cols = event.data[0].cols
-	submatrixIndex = event.data[0].submatrixIndex
-	matrixType = event.data[0].matrixType
-	__populationMatrix_values = event.data[0].values
-	
 	var resultJSON = "[" + submatrixIndex + ", " + __populationMatrix_rows + ", "
-	
-	__index = 0
-	for(var __i = 0; __i < __populationMatrix_rows; __i++){
-		populationMatrix[__i] = []
-		for(var __j = 0; __j < __populationMatrix_cols; __j++){
-			populationMatrix[__i][__j] = __populationMatrix_values[__index].value
-			__index += 1
-		}
-	}
 	
 	for(var __i = 0; __i < __populationMatrix_rows; __i++){
 		var fitnessValue = 0
