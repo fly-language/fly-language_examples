@@ -53,65 +53,51 @@ The fitness function evaluates each individual in __population__ or in __newIndi
 The code is the following:
 
 ``` javascript
-  native<<<
-    var edges = [[0, 1, 0, 1, 0], [1, 0, 1, 0, 1], [0, 1, 0, 0, 0], [1, 0, 0, 0, 1], [0, 1, 0, 1, 0]]
-	var x = JSON.stringify(populationMatrix);
-	console.log("Tipo rows: " + typeof x + "\n Dati: " + x)
-
-	var indexPar = x.indexOf("{", 20)
-	var indexInf = x.indexOf("values", 20) - 2
-        var startIndex = indexInf + 11
-	var info = x.substring(1, indexInf) + "}"
-	console.log("Info String: " + info)
-	var JsonInfo = JSON.parse(info)
+ native<<<
+ var edges = [[0, 1, 0, 1, 0], [1, 0, 1, 0, 1], [0, 1, 0, 0, 0], [1, 0, 0, 0, 1], [0, 1, 0, 1, 0]]
     
-        var rows = JsonInfo.rows;
-	var cols = JsonInfo.cols;
-	var start = JsonInfo.submatrixIndex;
     
-        var valuesNum = rows * cols
-	var sepVal = 2
-	var endIndex = startIndex - 2
-	var valIndex = endIndex - 1
-	var individual = Array()
+console.log(event.data[0])
+__populationMatrix_matrix = event.data[0]
+__populationMatrix_rows = event.data[0].rows
+__populationMatrix_cols = event.data[0].cols
+submatrixIndex = event.data[0].submatrixIndex
+matrixType = event.data[0].matrixType
+__populationMatrix_values = event.data[0].values
+	
+var resultJSON = "[" + submatrixIndex + ", " + __populationMatrix_rows + ", "
+	
+__index = 0
+for(var __i = 0; __i < __populationMatrix_rows; __i++){
+	populationMatrix[__i] = []
+	for(var __j = 0; __j < __populationMatrix_cols; __j++){
+		populationMatrix[__i][__j] = __populationMatrix_values[__index].value
+		__index += 1
+	}
+}
+	
+for(var __i = 0; __i < __populationMatrix_rows; __i++){
 	var fitnessValue = 0
-        var resultJSON = "[" + start + ", " + rows + ", "
-    
-    for(var i = 0; i < rows; i++){
-	for(var j = 0; j < cols; j++){
-            startIndex = endIndex + sepVal
-            endIndex = x.indexOf("}", startIndex)
-            valIndex = endIndex - 1
-            var temp = x.substring(startIndex, endIndex) + "}"
-            var tempJson = JSON.parse(temp)
-            var intValue = parseInt(tempJson.value)
-            individual.push(intValue)
-    	}
-        for(var j = 0; j < cols ; j++){
-	    var intValue = individual[j]
-			
-            for(var k = 0; k < cols; k++){
-
-                edgeValue = edges[j][k]
-                var KElement = individual[k]
-
-                if(k != j && edgeValue == 1 && intValue == KElement){
-                    fitnessValue += 1
-                }
-                console.log("k: " + k + ", j: " + j + ", edgeValue: " + edgeValue + ", intValue: " + intValue + ", KElement: " + KElement)
-            }
-        }
-        resultJSON += (fitnessValue/2) + ""
-    
-    	if(i >= 0 && i < rows - 1){
+	for(var __j = 0; __j < __populationMatrix_cols; __j++){
+		var currentColor = populationMatrix[__i][__j]
+		for(var __k = 0; __k < __populationMatrix_cols; __k++){
+			var edgeValue = edges[__j][__k]
+                	var edgeColor = populationMatrix[__i][__k]
+                
+               		if(__k != __j && edgeValue == 1 && currentColor == edgeColor){
+                    		fitnessValue += 1
+                	}
+		}
+	}
+	resultJSON += "" + (fitnessValue/2)
+		
+	if(__i >= 0 && __i < __populationMatrix_rows - 1){
     		resultJSON += ", "
     	}
-    
-    	fitnessValue = 0
-    	individual = Array()
-    }
-        resultJSON += "]";
-        console.log("Result: " + resultJSON)
+}
+	
+	resultJSON += "]";
+	console.log("Result: " + resultJSON)
 	__data = await __sqs.getQueueUrl({ QueueName: "ch-'${id}'"}).promise();
 		
 	__params = {
@@ -122,9 +108,8 @@ The code is the following:
 	__data = await __sqs.sendMessage(__params).promise();
 	__data = await __sqs.getQueueUrl({ QueueName: "termination-'${function}'-'${id}'"}).promise();
 	>>>
-}
 ```
-This funcition is made to evaluate a portion of individuals in a serverless environment. For this reason, results are formatted in a Json string, containing also the number of evaluated individuals and the __subMatrixPortion__ number. Results are sent to the client over a channel, ordered by __subMatrixPortion__ number and assigned to each evaluated individual.
+This funcition is made to evaluate a portion of individuals in a serverless environment. For this reason, results are formatted in a Json string, containing also the number of evaluated individuals and the __submatrixIndex__ number. Results are sent to the client over a channel, ordered by __submatrixIndex__ number and assigned to each evaluated individual.
 
 ### Selection Function 
 
